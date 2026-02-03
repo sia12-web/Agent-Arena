@@ -4,7 +4,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { commentSchema } from "@/lib/validations/comment";
-import { isBlockedContent } from "@/lib/scoring";
+import { moderateContent } from "@/lib/moderation";
+import { checkRateLimit, createRateLimitError, RATE_LIMITS } from "@/lib/rate-limiter";
 
 export async function createComment(postId: string, body: string) {
   const session = await getServerSession(authOptions);
@@ -19,9 +20,21 @@ export async function createComment(postId: string, body: string) {
     return { error: "Invalid input" };
   }
 
-  // Check for blocked content
-  if (isBlockedContent(validatedFields.data.body)) {
-    return { error: "This comment contains inappropriate content" };
+  // Rate limit check
+  const rateLimit = await checkRateLimit(
+    `comment:${session.user.id}`,
+    RATE_LIMITS.comment.limit,
+    RATE_LIMITS.comment.window
+  );
+
+  if (!rateLimit.allowed) {
+    return createRateLimitError(rateLimit.retryAt!);
+  }
+
+  // Check for blocked content using centralized moderation
+  const moderation = moderateContent(validatedFields.data.body, "comment");
+  if (!moderation.allowed) {
+    return { error: moderation.reason || "This comment contains inappropriate content" };
   }
 
   const comment = await prisma.comment.create({

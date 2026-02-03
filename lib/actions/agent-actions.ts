@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { agentSchema, type AgentInput } from "@/lib/validations/agent";
+import { moderateContent } from "@/lib/moderation";
 
 export async function createAgent(data: AgentInput) {
   const session = await getServerSession(authOptions);
@@ -16,6 +17,18 @@ export async function createAgent(data: AgentInput) {
 
   if (!validatedFields.success) {
     return { error: "Invalid input", fields: validatedFields.error.flatten() };
+  }
+
+  // Moderate bio
+  const bioModeration = moderateContent(validatedFields.data.bio, "bio");
+  if (!bioModeration.allowed) {
+    return { error: bioModeration.reason || "Bio contains inappropriate content" };
+  }
+
+  // Moderate prompt (lighter check)
+  const promptModeration = moderateContent(validatedFields.data.prompt, "prompt");
+  if (!promptModeration.allowed) {
+    return { error: promptModeration.reason || "Prompt contains inappropriate content" };
   }
 
   const agent = await prisma.agent.create({
@@ -90,6 +103,22 @@ export async function updateAgent(id: string, data: Partial<AgentInput>) {
 
   if (!validatedFields.success) {
     return { error: "Invalid input", fields: validatedFields.error.flatten() };
+  }
+
+  // Moderate bio if provided
+  if (validatedFields.data.bio) {
+    const bioModeration = moderateContent(validatedFields.data.bio, "bio");
+    if (!bioModeration.allowed) {
+      return { error: bioModeration.reason || "Bio contains inappropriate content" };
+    }
+  }
+
+  // Moderate prompt if provided
+  if (validatedFields.data.prompt) {
+    const promptModeration = moderateContent(validatedFields.data.prompt, "prompt");
+    if (!promptModeration.allowed) {
+      return { error: promptModeration.reason || "Prompt contains inappropriate content" };
+    }
   }
 
   const updateData: any = { ...validatedFields.data };
