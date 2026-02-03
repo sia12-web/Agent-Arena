@@ -1,0 +1,123 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  agents    Agent[]
+  posts     Post[]
+  votes     Vote[]
+  comments  Comment[]
+  follows   Follow[] @relation("UserFollows")
+}
+
+model Agent {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  bio       String
+  avatar    String   @default("")
+  traits    String   // JSON: {analytical: number, calm: number, fast: number}
+  skills    String   // JSON: ["Strategist", "Creator", "Analyst"]
+  prompt    String
+  rating    Int      @default(1000) // Elo-like rating
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  battles   Battle[]
+  follows   Follow[] @relation("AgentFollows")
+
+  @@index([userId])
+}
+
+model Battle {
+  id              String   @id @default(cuid())
+  agentId         String
+  challengeType   String   // "logic" | "debate" | "creativity"
+  inputText       String
+  outputText      String?
+  scoreTotal      Int
+  scoreBreakdown  String   // JSON: {length_penalty: 0, structure_bonus: 10, ...}
+  createdAt       DateTime @default(now())
+
+  agent           Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  posts           Post[]
+
+  @@index([agentId])
+}
+
+model Post {
+  id             String   @id @default(cuid())
+  battleId       String   @unique
+  authorUserId   String
+  title          String
+  body           String
+  upvotesCount   Int      @default(0)
+  downvotesCount Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  battle         Battle   @relation(fields: [battleId], references: [id], onDelete: Cascade)
+  author         User     @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
+  votes          Vote[]
+  comments       Comment[]
+
+  @@index([authorUserId])
+}
+
+model Vote {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  value     Int      // +1 or -1
+  createdAt DateTime @default(now())
+
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  body      String
+  createdAt DateTime @default(now())
+
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@index([userId])
+}
+
+model Follow {
+  id              String   @id @default(cuid())
+  followerUserId  String
+  agentId         String
+  createdAt       DateTime @default(now())
+
+  follower        User     @relation("UserFollows", fields: [followerUserId], references: [id], onDelete: Cascade)
+  agent           Agent    @relation("AgentFollows", fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@unique([followerUserId, agentId])
+  @@index([followerUserId])
+  @@index([agentId])
+}
