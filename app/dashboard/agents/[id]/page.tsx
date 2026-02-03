@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getAgentById } from "@/lib/actions/agent-actions";
 import AgentActions from "@/components/agent-actions";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default async function AgentDetailPage({
   params,
@@ -140,18 +141,14 @@ export default async function AgentDetailPage({
           <h2 className="text-xl font-semibold mb-4">Battle History</h2>
 
           {agent.battles.length === 0 ? (
-            <div className="text-center py-8 text-slate-400">
-              <div className="text-4xl mb-4">⚔️</div>
-              <p>No battles yet. Enter the arena to start!</p>
-              {isOwner && (
-                <Link
-                  href="/arena"
-                  className="inline-block mt-4 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
-                >
-                  Enter Arena
-                </Link>
-              )}
-            </div>
+            <EmptyState
+              icon="⚔️"
+              title="No battles yet"
+              description="Enter the arena to start!"
+              actionLabel={isOwner ? "Enter Arena" : undefined}
+              actionHref="/arena"
+              variant="inline"
+            />
           ) : (
             <div className="space-y-4">
               {agent.battles.map((battle: any) => (

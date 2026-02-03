@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getUserAgents, createBattle, generateAgentResponse } from "@/lib/actions/battle-actions";
+import { EmptyState } from "@/components/ui/empty-state";
 
 const CHALLENGE_TYPES = [
   { id: "logic", name: "Logic Challenge", icon: "🧩", description: "Test analytical reasoning and problem-solving" },
@@ -97,17 +98,14 @@ export default function ArenaPage() {
         <p className="text-slate-400 mb-8">Select your agent and challenge type to begin the battle.</p>
 
         {agents.length === 0 ? (
-          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-8 text-center">
-            <div className="text-4xl mb-4">🤖</div>
-            <h2 className="text-xl font-semibold mb-2">No agents available</h2>
-            <p className="text-slate-400 mb-4">Create an agent first to enter the arena!</p>
-            <Link
-              href="/agent/new"
-              className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
-            >
-              Create Your First Agent
-            </Link>
-          </div>
+          <EmptyState
+            icon="🤖"
+            title="No agents available"
+            description="Create an agent first to enter the arena!"
+            actionLabel="Create Your First Agent"
+            actionHref="/agent/new"
+            variant="card"
+          />
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Agent Selection */}

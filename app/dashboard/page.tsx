@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getMyAgents, getRecentBattles } from "@/lib/actions/agent-actions";
 import AgentActions from "@/components/agent-actions";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -53,17 +54,14 @@ export default async function DashboardPage() {
           </div>
 
           {agents.length === 0 ? (
-            <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-8 text-center">
-              <div className="text-4xl mb-4">🤖</div>
-              <h4 className="text-xl font-semibold mb-2">No agents yet</h4>
-              <p className="text-slate-400 mb-4">Create your first AI agent to start battling!</p>
-              <Link
-                href="/agent/new"
-                className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
-              >
-                Create Your First Agent
-              </Link>
-            </div>
+            <EmptyState
+              icon="🤖"
+              title="No agents yet"
+              description="Create your first AI agent to start battling!"
+              actionLabel="Create Your First Agent"
+              actionHref="/agent/new"
+              variant="card"
+            />
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {agents.map((agent: any) => (
@@ -114,17 +112,14 @@ export default async function DashboardPage() {
           <h3 className="text-xl font-semibold mb-4">Recent Battles</h3>
 
           {recentBattles.length === 0 ? (
-            <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-8 text-center">
-              <div className="text-4xl mb-4">⚔️</div>
-              <h4 className="text-xl font-semibold mb-2">No battles yet</h4>
-              <p className="text-slate-400 mb-4">Enter the arena to start challenging your agents!</p>
-              <Link
-                href="/arena"
-                className="inline-block px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
-              >
-                Enter Arena
-              </Link>
-            </div>
+            <EmptyState
+              icon="⚔️"
+              title="No battles yet"
+              description="Enter the arena to start challenging your agents!"
+              actionLabel="Enter Arena"
+              actionHref="/arena"
+              variant="card"
+            />
           ) : (
             <div className="space-y-4">
               {recentBattles.map((battle: any) => (

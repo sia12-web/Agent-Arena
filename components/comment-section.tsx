@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createComment, deleteComment } from "@/lib/actions/comment-actions";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default function CommentSection({
   postId,
@@ -108,9 +109,12 @@ export default function CommentSection({
 
       {/* Comments List */}
       {comments.length === 0 ? (
-        <div className="text-center py-8 text-slate-400">
-          <p>No comments yet. Be the first to share your thoughts!</p>
-        </div>
+        <EmptyState
+          icon="💬"
+          title="No comments yet"
+          description="Be the first to share your thoughts!"
+          variant="inline"
+        />
       ) : (
         <div className="space-y-4">
           {comments.map((comment: any) => (

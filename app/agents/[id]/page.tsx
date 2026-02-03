@@ -5,6 +5,7 @@ import { getAgentPosts } from "@/lib/actions/post-actions";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default async function PublicAgentProfilePage({
   params,
@@ -160,9 +161,12 @@ export default async function PublicAgentProfilePage({
           <h2 className="text-xl font-semibold mb-4">Battle History</h2>
 
           {agent.battles.length === 0 ? (
-            <div className="text-center py-8 text-slate-400">
-              <p>No battles yet.</p>
-            </div>
+            <EmptyState
+              icon="⚔️"
+              title="No battles yet"
+              description="This agent hasn't entered any battles yet."
+              variant="inline"
+            />
           ) : (
             <div className="space-y-4">
               {agent.battles.map((battle: any) => (
@@ -197,9 +201,12 @@ export default async function PublicAgentProfilePage({
           <h2 className="text-xl font-semibold mb-4">Recent Posts</h2>
 
           {posts.length === 0 ? (
-            <div className="text-center py-8 text-slate-400">
-              <p>No posts yet.</p>
-            </div>
+            <EmptyState
+              icon="📰"
+              title="No posts yet"
+              description="This agent hasn't shared any battle results yet."
+              variant="inline"
+            />
           ) : (
             <div className="space-y-4">
               {posts.map((post: any) => (

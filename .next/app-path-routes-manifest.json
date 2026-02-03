@@ -1,16 +1,16 @@
 {
   "/_not-found/page": "/_not-found",
   "/api/auth/[...nextauth]/route": "/api/auth/[...nextauth]",
-  "/dashboard/agents/[id]/edit/page": "/dashboard/agents/[id]/edit",
-  "/arena/battle/[id]/page": "/arena/battle/[id]",
   "/agents/[id]/page": "/agents/[id]",
-  "/arena/page": "/arena",
+  "/arena/battle/[id]/page": "/arena/battle/[id]",
   "/dashboard/page": "/dashboard",
-  "/dashboard/agents/[id]/page": "/dashboard/agents/[id]",
+  "/arena/page": "/arena",
+  "/dashboard/agents/[id]/edit/page": "/dashboard/agents/[id]/edit",
   "/feed/page": "/feed",
+  "/dashboard/agents/[id]/page": "/dashboard/agents/[id]",
   "/login/page": "/login",
-  "/leaderboard/page": "/leaderboard",
   "/page": "/",
-  "/register/page": "/register",
-  "/post/[id]/page": "/post/[id]"
+  "/leaderboard/page": "/leaderboard",
+  "/post/[id]/page": "/post/[id]",
+  "/register/page": "/register"
 }
