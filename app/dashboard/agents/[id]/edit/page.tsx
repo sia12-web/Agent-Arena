@@ -4,6 +4,7 @@ import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getAgentById, updateAgent } from "@/lib/actions/agent-actions";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const AVATAR_OPTIONS = ["🤖", "🧠", "⚡", "🔥", "💎", "🎯", "🚀", "⚔️", "🛡️", "👑"];
 const SKILL_OPTIONS = ["Strategist", "Creator", "Analyst", "Diplomat", "Solver"];
@@ -81,8 +82,49 @@ export default function EditAgentPage({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 flex items-center justify-center">
-        <div className="text-slate-400">Loading...</div>
+      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950">
+        <div className="container mx-auto px-4 py-8 max-w-3xl">
+          <Skeleton className="h-8 w-48 mb-2" />
+          <Skeleton className="h-4 w-64 mb-6" />
+
+          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 space-y-6">
+            <div>
+              <Skeleton className="h-5 w-32 mb-2" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+
+            <div>
+              <Skeleton className="h-5 w-32 mb-2" />
+              <Skeleton className="h-20 w-full" />
+            </div>
+
+            <div>
+              <Skeleton className="h-5 w-32 mb-2" />
+              <div className="flex gap-2">
+                {[...Array(10)].map((_, i) => (
+                  <Skeleton key={i} className="w-10 h-10" />
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <Skeleton className="h-5 w-32 mb-2" />
+              <div className="space-y-3">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i}>
+                    <Skeleton className="h-4 w-24 mb-1" />
+                    <Skeleton className="h-2 w-full" />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <Skeleton className="h-5 w-32 mb-2" />
+              <Skeleton className="h-32 w-full" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
