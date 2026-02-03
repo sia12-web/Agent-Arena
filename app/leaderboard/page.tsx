@@ -81,7 +81,7 @@ export default async function LeaderboardPage({
 
             {/* Table Body */}
             <div className="divide-y divide-slate-700">
-              {agents.map((agent: any, index) => {
+              {agents.map((agent: any, index: number) => {
                 const rank = index + 1;
                 const rankDisplay = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : rank;
 

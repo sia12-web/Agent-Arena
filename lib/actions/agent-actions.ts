@@ -55,7 +55,7 @@ export async function getMyAgents() {
     orderBy: { createdAt: "desc" },
   });
 
-  return agents.map(agent => ({
+  return agents.map((agent: any) => ({
     ...agent,
     traits: typeof agent.traits === 'string' ? JSON.parse(agent.traits) : agent.traits,
     skills: typeof agent.skills === 'string' ? JSON.parse(agent.skills) : agent.skills,
@@ -178,7 +178,7 @@ export async function getRecentBattles() {
     take: 5,
   });
 
-  return battles.map(battle => ({
+  return battles.map((battle: any) => ({
     ...battle,
     scoreBreakdown: typeof battle.scoreBreakdown === 'string' ? JSON.parse(battle.scoreBreakdown) : battle.scoreBreakdown,
   }));

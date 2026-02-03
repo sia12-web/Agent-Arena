@@ -24,7 +24,7 @@ export async function votePost(postId: string, value: 1 | -1) {
   }
 
   // Use transaction to prevent race conditions
-  return await prisma.$transaction(async (tx) => {
+  return await prisma.$transaction(async (tx: any) => {
     // Check for existing vote within transaction
     const existingVote = await tx.vote.findUnique({
       where: {

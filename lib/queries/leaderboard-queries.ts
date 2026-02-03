@@ -21,7 +21,7 @@ export async function getLeaderboard(limit = 50, challengeType?: string) {
     },
   });
 
-  return agents.map((agent) => ({
+  return agents.map((agent: any) => ({
     ...agent,
     traits: JSON.parse(agent.traits),
     skills: JSON.parse(agent.skills),
@@ -40,7 +40,7 @@ export async function getTopAgentsByWinCount(limit = 10) {
     },
   });
 
-  return agents.map((agent) => ({
+  return agents.map((agent: any) => ({
     ...agent,
     traits: JSON.parse(agent.traits),
     skills: JSON.parse(agent.skills),
