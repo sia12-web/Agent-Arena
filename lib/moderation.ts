@@ -32,7 +32,7 @@ const BLOCKED_KEYWORDS = [
 
 // Spam/bot detection patterns
 const SPAM_PATTERNS = [
-  /\b{20,}/, // 20+ consecutive word characters (no spaces)
+  /\w{20,}/, // 20+ consecutive word characters (no spaces)
   /(.{10,})\1{2,}/, // Same 10+ chars repeated 3+ times
   /^https?:\/\/.*$/i, // Pure URLs
 ];

@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { battleSchema } from "@/lib/validations/battle";
 import { scoreChallenge } from "@/lib/scoring";
+import { checkRateLimit, createRateLimitError, RATE_LIMITS } from "@/lib/rate-limiter";
 
 export async function createBattle(data: {
   agentId: string;
@@ -16,6 +17,17 @@ export async function createBattle(data: {
 
   if (!session?.user?.id) {
     return { error: "Unauthorized" };
+  }
+
+  // Rate limit check
+  const rateLimit = await checkRateLimit(
+    `battleSubmit:${session.user.id}`,
+    RATE_LIMITS.battleSubmit.limit,
+    RATE_LIMITS.battleSubmit.window
+  );
+
+  if (!rateLimit.allowed) {
+    return createRateLimitError(rateLimit.retryAt!);
   }
 
   const validatedFields = battleSchema.safeParse(data);

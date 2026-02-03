@@ -35,7 +35,7 @@ export default function CommentSection({
 
     const result = await createComment(postId, body);
 
-    if (result.error) {
+    if ('error' in result && result.error) {
       setError(result.error);
       setLoading(false);
       return;
@@ -44,7 +44,7 @@ export default function CommentSection({
     setBody("");
     setLoading(false);
     // Add new comment to list
-    if (result.comment) {
+    if ('comment' in result && result.comment) {
       setComments([...comments, result.comment]);
     }
   }
@@ -56,7 +56,7 @@ export default function CommentSection({
 
     const result = await deleteComment(commentId);
 
-    if (result.error) {
+    if ('error' in result && result.error) {
       setError(result.error);
       return;
     }

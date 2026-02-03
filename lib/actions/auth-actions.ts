@@ -3,8 +3,20 @@
 import * as bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { registerSchema, type RegisterInput } from "@/lib/validations/auth";
+import { checkRateLimit, createRateLimitError, RATE_LIMITS } from "@/lib/rate-limiter";
 
 export async function registerUser(data: RegisterInput) {
+  // Rate limit check (use email as identifier since user doesn't exist yet)
+  const rateLimit = await checkRateLimit(
+    `register:${data.email}`,
+    RATE_LIMITS.login.limit,
+    RATE_LIMITS.login.window
+  );
+
+  if (!rateLimit.allowed) {
+    return createRateLimitError(rateLimit.retryAt!);
+  }
+
   const validatedFields = registerSchema.safeParse(data);
 
   if (!validatedFields.success) {

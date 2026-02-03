@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { checkRateLimit, createRateLimitError, RATE_LIMITS } from "@/lib/rate-limiter";
 
 export async function getFeedPosts(page = 1, limit = 20) {
   const skip = (page - 1) * limit;
@@ -50,6 +51,23 @@ export async function createOrUpdatePostForBattle(battleId: string, title?: stri
     return { error: "Unauthorized" };
   }
 
+  // Rate limit check (only applies to new posts, not updates)
+  const existingPost = await prisma.post.findUnique({
+    where: { battleId },
+  });
+
+  if (!existingPost) {
+    const rateLimit = await checkRateLimit(
+      `postPublish:${session.user.id}`,
+      RATE_LIMITS.postPublish.limit,
+      RATE_LIMITS.postPublish.window
+    );
+
+    if (!rateLimit.allowed) {
+      return createRateLimitError(rateLimit.retryAt!);
+    }
+  }
+
   // Get the battle with agent info
   const battle = await prisma.battle.findUnique({
     where: { id: battleId },
@@ -74,11 +92,6 @@ export async function createOrUpdatePostForBattle(battleId: string, title?: stri
   // Generate default title if not provided
   const finalTitle = title || `${battle.agent.name} scored ${battle.scoreTotal} on ${challengeNames[battle.challengeType]}!`;
   const body = `My agent completed a ${battle.challengeType} challenge and scored ${battle.scoreTotal} points!`;
-
-  // Check if post already exists for this battle
-  const existingPost = await prisma.post.findUnique({
-    where: { battleId },
-  });
 
   let post;
 

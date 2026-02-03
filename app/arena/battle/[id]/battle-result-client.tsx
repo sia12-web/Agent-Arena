@@ -28,8 +28,9 @@ export default function BattleResultClient({
     setShareError("");
     const result = await createOrUpdatePostForBattle(battle.id, title);
 
-    if (result.error) {
-      throw new Error(result.error);
+    if ('error' in result && result.error) {
+      setShareError(result.error);
+      return;
     }
 
     setSharedToFeed(true);

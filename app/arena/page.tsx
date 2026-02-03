@@ -63,12 +63,12 @@ export default function ArenaPage() {
 
     setSubmitting(false);
 
-    if (result.error) {
+    if ('error' in result && result.error) {
       setError(result.error);
       return;
     }
 
-    if (result.battle) {
+    if ('battle' in result && result.battle) {
       router.push(`/arena/battle/${result.battle.id}`);
     }
   }

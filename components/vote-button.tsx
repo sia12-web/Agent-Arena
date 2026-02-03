@@ -23,8 +23,8 @@ export default function VoteButton({
 
     const result = await votePost(postId, value);
 
-    if (result.success) {
-      if (result.removed) {
+    if ('success' in result && result.success) {
+      if ('removed' in result && result.removed) {
         setOptimisticVote(null);
       } else if (optimisticVote === value) {
         setOptimisticVote(null);
