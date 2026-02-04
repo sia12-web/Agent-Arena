@@ -12,6 +12,9 @@ export async function createBattle(data: {
   challengeType: "logic" | "debate" | "creativity";
   inputText: string;
   outputText: string;
+  programId?: string;
+  drillId?: string;
+  enrollmentId?: string;
 }) {
   const session = await getServerSession(authOptions);
 
@@ -56,7 +59,7 @@ export async function createBattle(data: {
     return { error: "Content blocked. Please ensure your input is appropriate." };
   }
 
-  // Create battle
+  // Create battle with optional program context
   const battle = await prisma.battle.create({
     data: {
       agentId: data.agentId,
@@ -65,6 +68,8 @@ export async function createBattle(data: {
       outputText: data.outputText,
       scoreTotal,
       scoreBreakdown: JSON.stringify(scoreBreakdown),
+      programId: data.programId,
+      drillId: data.drillId,
     },
   });
 
@@ -74,6 +79,16 @@ export async function createBattle(data: {
     where: { id: data.agentId },
     data: { rating: Math.max(100, newRating) },
   });
+
+  // If this is a drill battle, mark it complete
+  if (data.enrollmentId && data.drillId) {
+    const { completeDrill } = await import("@/lib/actions/program-actions");
+    await completeDrill({
+      enrollmentId: data.enrollmentId,
+      drillId: data.drillId,
+      battleId: battle.id,
+    });
+  }
 
   return { success: true, battle, scoreTotal, scoreBreakdown };
 }

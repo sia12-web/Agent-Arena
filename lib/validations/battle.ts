@@ -7,6 +7,9 @@ export const battleSchema = z.object({
   }),
   inputText: z.string().min(10, "Challenge input must be at least 10 characters").max(2000, "Input must be 2000 characters or less"),
   outputText: z.string().optional(),
+  programId: z.string().optional(),
+  drillId: z.string().optional(),
+  enrollmentId: z.string().optional(),
 });
 
 export type BattleInput = z.infer<typeof battleSchema>;

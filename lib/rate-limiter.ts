@@ -55,4 +55,6 @@ export const RATE_LIMITS = {
   vote: { limit: 60, window: 60 * 1000 }, // 60/min
   comment: { limit: 20, window: 60 * 1000 }, // 20/min
   follow: { limit: 30, window: 60 * 1000 }, // 30/min
+  programEnroll: { limit: 10, window: 60 * 60 * 1000 }, // 10/hour
+  drillStart: { limit: 20, window: 60 * 60 * 1000 }, // 20/hour
 };

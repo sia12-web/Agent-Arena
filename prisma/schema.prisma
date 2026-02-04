@@ -11,35 +11,37 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String              @id @default(cuid())
+  email       String              @unique
+  password    String
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
 
-  agents    Agent[]
-  posts     Post[]
-  votes     Vote[]
-  comments  Comment[]
-  follows   Follow[] @relation("UserFollows")
+  agents      Agent[]
+  posts       Post[]
+  votes       Vote[]
+  comments    Comment[]
+  follows     Follow[]            @relation("UserFollows")
+  enrollments ProgramEnrollment[]
 }
 
 model Agent {
-  id        String   @id @default(cuid())
-  userId    String
-  name      String
-  bio       String
-  avatar    String   @default("")
-  traits    String   // JSON: {analytical: number, calm: number, fast: number}
-  skills    String   // JSON: ["Strategist", "Creator", "Analyst"]
-  prompt    String
-  rating    Int      @default(1000) // Elo-like rating
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String              @id @default(cuid())
+  userId      String
+  name        String
+  bio         String
+  avatar      String              @default("")
+  traits      String              // JSON: {analytical: number, calm: number, fast: number}
+  skills      String              // JSON: ["Strategist", "Creator", "Analyst"]
+  prompt      String
+  rating      Int                 @default(1000) // Elo-like rating
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  battles   Battle[]
-  follows   Follow[] @relation("AgentFollows")
+  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  battles     Battle[]
+  follows     Follow[]            @relation("AgentFollows")
+  enrollments ProgramEnrollment[]
 
   @@index([userId])
 }
@@ -52,12 +54,19 @@ model Battle {
   outputText      String?
   scoreTotal      Int
   scoreBreakdown  String   // JSON: {length_penalty: 0, structure_bonus: 10, ...}
+  programId       String?
+  program         Program? @relation(fields: [programId], references: [id])
+  drillId         String?
+  drill           ProgramDrill? @relation(fields: [drillId], references: [id])
+  completion      DrillCompletion?
   createdAt       DateTime @default(now())
 
   agent           Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
   posts           Post[]
 
   @@index([agentId])
+  @@index([programId])
+  @@index([drillId])
 }
 
 model Post {
@@ -120,4 +129,66 @@ model Follow {
   @@unique([followerUserId, agentId])
   @@index([followerUserId])
   @@index([agentId])
+}
+
+model Program {
+  id            String        @id @default(cuid())
+  slug          String        @unique
+  title         String
+  description   String
+  challengeType String        // "logic" | "debate" | "creativity"
+  drills        ProgramDrill[]
+  enrollments   ProgramEnrollment[]
+  battles       Battle[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([challengeType])
+}
+
+model ProgramDrill {
+  id            String            @id @default(cuid())
+  programId     String
+  program       Program           @relation(fields: [programId], references: [id], onDelete: Cascade)
+  orderIndex    Int               // 1-10
+  title         String
+  difficulty    Int               // 1-5
+  presetInput   String            // Pre-filled challenge text
+  completions   DrillCompletion[]
+  battles       Battle[]
+  createdAt     DateTime          @default(now())
+
+  @@unique([programId, orderIndex])
+  @@index([programId])
+}
+
+model ProgramEnrollment {
+  id           String              @id @default(cuid())
+  programId    String
+  program      Program             @relation(fields: [programId], references: [id], onDelete: Cascade)
+  agentId      String
+  agent        Agent               @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  completions  DrillCompletion[]
+  createdAt    DateTime            @default(now())
+  completedAt  DateTime?
+
+  @@unique([programId, agentId])
+  @@index([userId])
+  @@index([agentId])
+}
+
+model DrillCompletion {
+  id           String            @id @default(cuid())
+  enrollmentId String
+  enrollment   ProgramEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  drillId      String
+  drill        ProgramDrill      @relation(fields: [drillId], references: [id], onDelete: Cascade)
+  battleId     String?           @unique  // Link to actual battle when completed (one-to-one)
+  battle       Battle?           @relation(fields: [battleId], references: [id])
+  completedAt  DateTime          @default(now())
+
+  @@unique([enrollmentId, drillId])
+  @@index([enrollmentId])
 }

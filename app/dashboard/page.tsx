@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getMyAgents, getRecentBattles } from "@/lib/actions/agent-actions";
+import { getMyEnrollments } from "@/lib/actions/program-actions";
 import AgentActions from "@/components/agent-actions";
 import { EmptyState } from "@/components/ui/empty-state";
 
@@ -15,6 +16,7 @@ export default async function DashboardPage() {
 
   const agents = await getMyAgents();
   const recentBattles = await getRecentBattles();
+  const enrollments = await getMyEnrollments();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950">
@@ -23,12 +25,31 @@ export default async function DashboardPage() {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold">Agent Arena</h1>
           <nav className="flex gap-6">
-            <Link href="/dashboard" className="text-blue-400 font-medium">Dashboard</Link>
-            <Link href="/arena" className="text-slate-300 hover:text-white">Arena</Link>
-            <Link href="/feed" className="text-slate-300 hover:text-white">Feed</Link>
-            <Link href="/leaderboard" className="text-slate-300 hover:text-white">Leaderboard</Link>
+            <Link href="/dashboard" className="text-blue-400 font-medium">
+              Dashboard
+            </Link>
+            <Link href="/arena" className="text-slate-300 hover:text-white">
+              Arena
+            </Link>
+            <Link href="/programs" className="text-slate-300 hover:text-white">
+              Programs
+            </Link>
+            <Link href="/feed" className="text-slate-300 hover:text-white">
+              Feed
+            </Link>
+            <Link
+              href="/leaderboard"
+              className="text-slate-300 hover:text-white"
+            >
+              Leaderboard
+            </Link>
             <form action="/api/auth/signout" method="POST">
-              <button type="submit" className="text-slate-400 hover:text-white">Sign Out</button>
+              <button
+                type="submit"
+                className="text-slate-400 hover:text-white"
+              >
+                Sign Out
+              </button>
             </form>
           </nav>
         </div>
@@ -146,6 +167,71 @@ export default async function DashboardPage() {
                     {new Date(battle.createdAt).toLocaleDateString()}
                   </p>
                 </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Training Programs Section */}
+        <div className="mt-8">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold">Training Programs</h3>
+            <Link
+              href="/programs"
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
+            >
+              Browse Programs
+            </Link>
+          </div>
+
+          {enrollments.length === 0 ? (
+            <EmptyState
+              icon="🎓"
+              title="No active enrollments"
+              description="Enroll your agents in training programs to level up their skills!"
+              actionLabel="Browse Programs"
+              actionHref="/programs"
+              variant="card"
+            />
+          ) : (
+            <div className="grid md:grid-cols-2 gap-4">
+              {enrollments.map((enrollment: any) => (
+                <Link
+                  key={enrollment.id}
+                  href={`/programs/train/${enrollment.id}`}
+                  className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 hover:border-slate-600 transition-colors"
+                >
+                  <div className="flex items-center gap-4 mb-4">
+                    <span className="text-3xl">{enrollment.agent.avatar}</span>
+                    <div>
+                      <h4 className="font-semibold">
+                        {enrollment.program.title}
+                      </h4>
+                      <p className="text-sm text-slate-400">
+                        {enrollment.agent.name}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Progress */}
+                  <div className="mb-2">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-slate-400">Progress</span>
+                      <span className="font-medium">{enrollment.progressPercent}%</span>
+                    </div>
+                    <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
+                        style={{ width: `${enrollment.progressPercent}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="text-sm text-slate-400">
+                    {enrollment.completedDrills} of {enrollment.totalDrills} drills
+                    completed
+                  </div>
+                </Link>
               ))}
             </div>
           )}

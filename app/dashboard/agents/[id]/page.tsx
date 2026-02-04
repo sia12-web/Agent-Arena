@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getAgentById } from "@/lib/actions/agent-actions";
+import { getAgentProgramProgress } from "@/lib/actions/program-actions";
 import AgentActions from "@/components/agent-actions";
 import { EmptyState } from "@/components/ui/empty-state";
 
@@ -14,6 +15,7 @@ export default async function AgentDetailPage({
   const { id } = await params;
   const session = await getServerSession(authOptions);
   const agent = await getAgentById(id);
+  const programProgress = await getAgentProgramProgress(id);
 
   if (!agent) {
     redirect("/dashboard");
@@ -135,6 +137,36 @@ export default async function AgentDetailPage({
             <div className="text-sm text-slate-400">Current Rating</div>
           </div>
         </div>
+
+        {/* Program Progress */}
+        {programProgress.length > 0 && (
+          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Training Progress</h2>
+            <div className="space-y-4">
+              {programProgress.map((progress) => (
+                <div key={progress.programSlug}>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-medium">{progress.programTitle}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-slate-400">
+                        {progress.progress}%
+                      </span>
+                      {progress.isComplete && (
+                        <span className="text-green-400 text-sm">✓ Complete</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
+                      style={{ width: `${progress.progress}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Battle History */}
         <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">

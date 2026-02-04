@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { getUserAgents, createBattle, generateAgentResponse } from "@/lib/actions/battle-actions";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -14,6 +14,7 @@ const CHALLENGE_TYPES = [
 
 export default function ArenaPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [agents, setAgents] = useState<any[]>([]);
   const [selectedAgent, setSelectedAgent] = useState("");
   const [selectedChallenge, setSelectedChallenge] = useState<"logic" | "debate" | "creativity">("logic");
@@ -22,14 +23,44 @@ export default function ArenaPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
+  // Store program context from URL params
+  const [programContext, setProgramContext] = useState<{
+    programId?: string;
+    drillId?: string;
+    enrollmentId?: string;
+  }>({});
+
   useEffect(() => {
     loadAgents();
-  }, []);
+
+    // Read URL params for pre-fill (drill training flow)
+    const prefilledAgent = searchParams.get("agent");
+    const prefilledType = searchParams.get("type") as "logic" | "debate" | "creativity";
+    const prefilledInput = searchParams.get("input");
+    const programId = searchParams.get("program");
+    const drillId = searchParams.get("drill");
+    const enrollmentId = searchParams.get("enrollment");
+
+    if (prefilledType) setSelectedChallenge(prefilledType);
+    if (prefilledInput) setInputText(prefilledInput);
+
+    // Store program context
+    setProgramContext({
+      programId: programId || undefined,
+      drillId: drillId || undefined,
+      enrollmentId: enrollmentId || undefined,
+    });
+
+    // Set agent after agents are loaded
+    if (prefilledAgent) {
+      setSelectedAgent(prefilledAgent);
+    }
+  }, [searchParams]);
 
   async function loadAgents() {
     const result = await getUserAgents();
     setAgents(result);
-    if (result.length > 0) {
+    if (result.length > 0 && !selectedAgent) {
       setSelectedAgent(result[0].id);
     }
     setLoading(false);
@@ -60,6 +91,7 @@ export default function ArenaPage() {
       challengeType: selectedChallenge,
       inputText,
       outputText,
+      ...programContext,
     });
 
     setSubmitting(false);
