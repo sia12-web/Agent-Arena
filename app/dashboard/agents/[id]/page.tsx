@@ -4,7 +4,9 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getAgentById } from "@/lib/actions/agent-actions";
 import { getAgentProgramProgress } from "@/lib/actions/program-actions";
+import { getAgentCoachInsights } from "@/lib/actions/coach-report-actions";
 import AgentActions from "@/components/agent-actions";
+import { TrainingInsightsCard } from "@/components/training-insights-card";
 import { EmptyState } from "@/components/ui/empty-state";
 
 export default async function AgentDetailPage({
@@ -16,6 +18,7 @@ export default async function AgentDetailPage({
   const session = await getServerSession(authOptions);
   const agent = await getAgentById(id);
   const programProgress = await getAgentProgramProgress(id);
+  const coachReports = await getAgentCoachInsights(id);
 
   if (!agent) {
     redirect("/dashboard");
@@ -137,6 +140,9 @@ export default async function AgentDetailPage({
             <div className="text-sm text-slate-400">Current Rating</div>
           </div>
         </div>
+
+        {/* Training Insights */}
+        <TrainingInsightsCard coachReports={coachReports} isOwner={isOwner} />
 
         {/* Program Progress */}
         {programProgress.length > 0 && (

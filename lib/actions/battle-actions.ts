@@ -90,6 +90,26 @@ export async function createBattle(data: {
     });
   }
 
+  // Generate and save coach report
+  const { generateCoachReport } = await import("@/lib/coach-report");
+  const coachReport = generateCoachReport(
+    data.challengeType,
+    scoreBreakdown,
+    data.inputText,
+    data.outputText
+  );
+
+  await prisma.battleCoachReport.create({
+    data: {
+      battleId: battle.id,
+      strengthsJson: JSON.stringify(coachReport.strengths),
+      weaknessesJson: JSON.stringify(coachReport.weaknesses),
+      promptSuggestionsJson: JSON.stringify(coachReport.promptSuggestions),
+      nextDrillsJson: JSON.stringify(coachReport.nextDrills),
+      recommendedFocus: coachReport.recommendedFocus,
+    },
+  });
+
   return { success: true, battle, scoreTotal, scoreBreakdown };
 }
 
@@ -113,6 +133,7 @@ export async function getBattleById(id: string) {
     where: { id },
     include: {
       agent: true,
+      coachReport: true,
     },
   });
 
@@ -120,10 +141,23 @@ export async function getBattleById(id: string) {
     return null;
   }
 
-  return {
+  const result: any = {
     ...battle,
     scoreBreakdown: JSON.parse(battle.scoreBreakdown),
   };
+
+  // Parse coach report JSON if exists
+  if (battle.coachReport) {
+    result.coachReport = {
+      ...battle.coachReport,
+      strengths: JSON.parse(battle.coachReport.strengthsJson),
+      weaknesses: JSON.parse(battle.coachReport.weaknessesJson),
+      promptSuggestions: JSON.parse(battle.coachReport.promptSuggestionsJson),
+      nextDrills: JSON.parse(battle.coachReport.nextDrillsJson),
+    };
+  }
+
+  return result;
 }
 
 // Generate a simple agent response (template-based for MVP)

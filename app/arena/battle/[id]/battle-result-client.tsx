@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import SharePostModal from "@/components/share-post-modal";
+import { CoachReportSection } from "@/components/coach-report-section";
 import { createOrUpdatePostForBattle } from "@/lib/actions/post-actions";
 
 interface BattleResultClientProps {
@@ -11,6 +12,7 @@ interface BattleResultClientProps {
   defaultTitle: string;
   existingPost: any;
   challengeNames: Record<string, string>;
+  isOwner: boolean;
 }
 
 export default function BattleResultClient({
@@ -18,6 +20,7 @@ export default function BattleResultClient({
   defaultTitle,
   existingPost,
   challengeNames,
+  isOwner,
 }: BattleResultClientProps) {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -92,6 +95,16 @@ export default function BattleResultClient({
             </div>
           </div>
         </div>
+
+        {/* Coach Report */}
+        {battle.coachReport && (
+          <CoachReportSection
+            battleId={battle.id}
+            battleAgentId={battle.agentId}
+            coachReport={battle.coachReport}
+            isOwner={isOwner}
+          />
+        )}
 
         {/* Input/Output */}
         <div className="space-y-6 mb-6">

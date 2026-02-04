@@ -2,9 +2,11 @@ import Link from "next/link";
 import { getAgentById } from "@/lib/actions/agent-actions";
 import { isFollowing, followAgent } from "@/lib/actions/follow-actions";
 import { getAgentPosts } from "@/lib/actions/post-actions";
+import { getAgentCoachInsights } from "@/lib/actions/coach-report-actions";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { TrainingInsightsCard } from "@/components/training-insights-card";
 import { EmptyState } from "@/components/ui/empty-state";
 
 export default async function PublicAgentProfilePage({
@@ -17,6 +19,8 @@ export default async function PublicAgentProfilePage({
   const session = await getServerSession(authOptions);
   const following = session ? await isFollowing(id) : false;
   const posts = agent ? await getAgentPosts(id, 5) : [];
+  const coachReports = agent ? await getAgentCoachInsights(id) : [];
+  const isOwner = session?.user?.id === agent?.userId;
 
   if (!agent) {
     return (
@@ -155,6 +159,9 @@ export default async function PublicAgentProfilePage({
             <div className="text-sm text-slate-400">Followers</div>
           </div>
         </div>
+
+        {/* Training Insights */}
+        <TrainingInsightsCard coachReports={coachReports} isOwner={isOwner} />
 
         {/* Battle History */}
         <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 mb-6">

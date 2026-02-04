@@ -63,6 +63,7 @@ model Battle {
 
   agent           Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
   posts           Post[]
+  coachReport     BattleCoachReport?
 
   @@index([agentId])
   @@index([programId])
@@ -191,4 +192,26 @@ model DrillCompletion {
 
   @@unique([enrollmentId, drillId])
   @@index([enrollmentId])
+}
+
+model BattleCoachReport {
+  id                  String   @id @default(cuid())
+  battleId            String   @unique
+  battle              Battle   @relation(fields: [battleId], references: [id], onDelete: Cascade)
+
+  // Core feedback arrays (stored as JSON strings)
+  strengthsJson       String   // JSON string array
+  weaknessesJson      String   // JSON string array
+  promptSuggestionsJson String // JSON string array
+
+  // Next drill recommendations (JSON array of objects)
+  nextDrillsJson      String   // JSON: [{challenge_type, preset_title, preset_input}]
+
+  // Overall focus recommendation
+  recommendedFocus    String   // "LOGIC" | "DEBATE" | "CREATIVITY" | "GENERAL"
+
+  createdAt           DateTime @default(now())
+
+  @@index([battleId])
+  @@index([recommendedFocus])
 }
