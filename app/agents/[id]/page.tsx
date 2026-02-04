@@ -7,6 +7,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { TrainingInsightsCard } from "@/components/training-insights-card";
+import { AgentAnalyticsPanel } from "@/components/agent-analytics-panel";
 import { EmptyState } from "@/components/ui/empty-state";
 
 export default async function PublicAgentProfilePage({
@@ -159,6 +160,9 @@ export default async function PublicAgentProfilePage({
             <div className="text-sm text-slate-400">Followers</div>
           </div>
         </div>
+
+        {/* Analytics */}
+        <AgentAnalyticsPanel agentId={agent.id} isOwner={isOwner} />
 
         {/* Training Insights */}
         <TrainingInsightsCard coachReports={coachReports} isOwner={isOwner} />

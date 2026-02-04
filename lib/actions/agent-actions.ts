@@ -183,3 +183,54 @@ export async function getRecentBattles() {
     scoreBreakdown: typeof battle.scoreBreakdown === 'string' ? JSON.parse(battle.scoreBreakdown) : battle.scoreBreakdown,
   }));
 }
+
+export async function getAgentAnalytics(agentId: string, includeRecentScores = false) {
+  const session = await getServerSession(authOptions);
+
+  const agent = await prisma.agent.findUnique({
+    where: { id: agentId },
+    include: {
+      battles: {
+        orderBy: { createdAt: "desc" },
+        take: includeRecentScores ? 20 : undefined,
+      },
+      enrollments: {
+        where: { completedAt: { not: null } },
+      },
+    },
+  });
+
+  if (!agent) return null;
+
+  const isOwner = session?.user?.id === agent.userId;
+  const programCompletions = agent.enrollments.length;
+
+  const {
+    computeCoreMetrics,
+    computeSkillBreakdown,
+    computeTrend,
+    computePersonalBests,
+  } = await import("@/lib/analytics/agent-analytics");
+
+  type ChallengeType = "logic" | "debate" | "creativity";
+
+  const battles = agent.battles.map((b) => ({
+    scoreTotal: b.scoreTotal,
+    challengeType: b.challengeType as ChallengeType,
+    createdAt: b.createdAt,
+  }));
+
+  const coreMetrics = computeCoreMetrics(battles);
+  const skills = computeSkillBreakdown(battles);
+  const trend = computeTrend(battles);
+  const personalBests = computePersonalBests(battles);
+
+  return {
+    ...coreMetrics,
+    programCompletions,
+    skills,
+    trend,
+    personalBests,
+    recentScores: isOwner && includeRecentScores ? battles.slice(0, 20).reverse() : undefined,
+  };
+}

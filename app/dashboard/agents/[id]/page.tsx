@@ -7,6 +7,7 @@ import { getAgentProgramProgress } from "@/lib/actions/program-actions";
 import { getAgentCoachInsights } from "@/lib/actions/coach-report-actions";
 import AgentActions from "@/components/agent-actions";
 import { TrainingInsightsCard } from "@/components/training-insights-card";
+import { AgentAnalyticsPanel } from "@/components/agent-analytics-panel";
 import { EmptyState } from "@/components/ui/empty-state";
 
 export default async function AgentDetailPage({
@@ -140,6 +141,9 @@ export default async function AgentDetailPage({
             <div className="text-sm text-slate-400">Current Rating</div>
           </div>
         </div>
+
+        {/* Analytics */}
+        <AgentAnalyticsPanel agentId={agent.id} isOwner={isOwner} />
 
         {/* Training Insights */}
         <TrainingInsightsCard coachReports={coachReports} isOwner={isOwner} />
